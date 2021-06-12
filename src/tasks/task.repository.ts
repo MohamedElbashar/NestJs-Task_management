@@ -9,6 +9,16 @@ export class TaskRepository extends Repository<Task> {
   async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
     const { status, search } = filterDto;
     const query = this.createQueryBuilder('task');
+    if (status) {
+      query.andWhere('task.status=:status', { status });
+    }
+    if (search) {
+      query.andWhere(
+        '(task.title Like :search OR task.description Like :search)',
+        { search: `%${search}%` },
+      );
+    }
+
     const tasks = await query.getMany();
     return tasks;
   }
