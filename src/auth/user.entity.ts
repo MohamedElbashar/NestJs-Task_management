@@ -2,10 +2,12 @@ import {
   BaseEntity,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Task } from 'src/tasks/task.entity';
 @Entity()
 @Unique(['username'])
 export class User extends BaseEntity {
@@ -17,4 +19,7 @@ export class User extends BaseEntity {
 
   @Column()
   password: string;
+
+  @OneToMany((type) => Task, (task) => task.user, { eager: true })
+  tasks: Task[];
 }
