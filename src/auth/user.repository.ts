@@ -11,11 +11,11 @@ import { User } from './user.entity';
 export class UserRepository extends Repository<User> {
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
     const { username, password } = authCredentialsDto;
-
+    const salt = await bcrypt.genSalt();
     const user = new User();
     user.username = username;
-    user.salt = await bcrypt.genSalt();
-    user.password = await this.hashPassword(password, user.salt);
+    user.password = await this.hashPassword(password, salt);
+
     try {
       await user.save();
     } catch (err) {
@@ -33,8 +33,8 @@ export class UserRepository extends Repository<User> {
     const { username, password } = authCredentialsDto;
 
     const user = await this.findOne({ username });
-
-    if (user && (await user.validatePassword(password))) {
+    const compare = await bcrypt.compare(password, user.password);
+    if (user && compare) {
       return user.username;
     } else {
       return null;
